@@ -1,1 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expedição e Logística | TurboSul</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-turbo-dark { background-color: #1E293B; } /* Slate-800 */
+        .bg-turbo-header { background-color: #334155; } /* Slate-700 */
+        .bg-turbo-blue { background-color: #2563EB; }
+        
+        .os-card-selected {
+            border-left: 4px solid #2563EB;
+            background-color: #f8fafc;
+        }
+
+        .input-notes {
+            background-color: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+        }
+        .input-notes:focus {
+            border-color: #2563EB;
+            outline: none;
+        }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen overflow-hidden">
+
+    <!-- HEADER -->
+    <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center space-x-4">
+            <img src="https://i.postimg.cc/Jh5Jvrc9/IMG-7901.png" alt="TurboSul Logo" class="h-10">
+            <div>
+                <h1 class="text-lg font-bold tracking-tight text-slate-900 uppercase">TurboSul - Controle de Produção</h1>
+                <p class="text-xs text-slate-500 font-medium italic">Gerenciamento de Ordens de Serviço</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-6">
+            <button class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-200 transition">Quadro de Produção</button>
+            <div class="flex items-center space-x-3 border-l pl-6 border-slate-200 text-xs font-bold text-slate-400">
+                <span>BR</span> <span class="text-slate-800 uppercase mr-4">Português</span>
+                <div class="text-right border-l pl-6">
+                    <p class="text-sm font-bold text-slate-800 leading-none">Administrador</p>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wider">Expedição</p>
+                </div>
+                <button onclick="window.location.href='index.html'" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition ml-4">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-64px)] overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-80 bg-white border-r border-slate-200 overflow-y-auto flex-shrink-0">
+            <div class="p-4 border-b border-slate-100 bg-slate-50 sticky top-0 z-10">
+                <h2 class="text-xs font-black uppercase tracking-widest text-slate-400 italic">Aguardando Conferência de Anexos</h2>
+            </div>
+            <div id="os-queue-container" class="p-4 space-y-4">
+                <div class="p-8 text-center text-slate-400 animate-pulse italic text-xs">Carregando fila...</div>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="flex-1 overflow-y-auto p-8 bg-slate-50">
+            <h2 class="text-2xl font-black text-slate-800 mb-8 flex items-center uppercase italic">
+                <span class="w-1 h-8 bg-turbo-dark mr-3 rounded-full"></span> Setor de Expedição e Logística
+            </h2>
+
+            <!-- EMPTY STATE -->
+            <div id="empty-state" class="flex flex-col items-center justify-center h-[60vh] text-slate-300">
+                <i class="fa-solid fa-truck-ramp-box text-6xl mb-4 opacity-20"></i>
+                <p class="text-xl font-black uppercase tracking-[0.2em]">Selecione uma OS para o Despacho</p>
+            </div>
+
+            <!-- WORKSPACE ATIVO -->
+            <div id="workspace" class="hidden space-y-6 fade-in">
+                
+                <!-- PAINEL OS (AZUL ESCURO/NAVY) -->
+                <div class="bg-turbo-dark text-white rounded-xl p-6 shadow-lg relative overflow-hidden flex justify-between items-center border-l-8 border-turbo-blue">
+                    <div class="relative z-10">
+                        <h2 id="display-os-id" class="text-4xl font-black italic mb-1 uppercase tracking-tighter">ID PENDENTE</h2>
+                        <p id="display-os-desc" class="text-sm font-bold opacity-80 uppercase tracking-widest">OS-XXXX | CLIENTE</p>
+                    </div>
+                    <button class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-[10px] font-black border border-white/20 tracking-widest transition" id="display-client-tag">PREMIUM VOLV</button>
+                </div>
+
+                <!-- CONFERÊNCIA FINAL -->
+                <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div class="flex items-center space-x-3 text-slate-700">
+                            <i class="fa-solid fa-boxes-packing text-xl"></i>
+                            <h3 class="font-black uppercase italic tracking-tight">Conferência Final de Anexos do Cliente</h3>
+                        </div>
+                        <button class="bg-slate-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase shadow-md hover:bg-slate-600 transition">Histórico Completo</button>
+                    </div>
+
+                    <div class="p-8 space-y-8">
+                        <!-- GRID LOGÍSTICA -->
+                        <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-5 grid grid-cols-3 gap-8 text-[10px] font-black uppercase tracking-tighter">
+                            <div>
+                                <p class="text-blue-800 mb-1">Destino de Envio</p>
+                                <p class="text-blue-600 text-sm font-bold" id="info-destino">SC LOG</p>
+                            </div>
+                            <div>
+                                <p class="text-blue-800 mb-1">Horário Previsto</p>
+                                <p class="text-blue-600 text-sm font-bold">@</p>
+                            </div>
+                            <div>
+                                <p class="text-blue-800 mb-1">Identificação</p>
+                                <p class="text-blue-600 text-sm font-bold">---</p>
+                            </div>
+                        </div>
+
+                        <!-- CHECKLIST DE ANEXOS -->
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Checklist de Itens a Retornar ao Cliente</p>
+                            <div id="anexos-list" class="border-2 border-dashed border-slate-100 rounded-2xl p-10 text-center text-slate-400 italic text-sm">
+                                NENHUM ANEXO FOI REGISTRADO PARA ESTE TURBO.
+                            </div>
+                        </div>
+
+                        <!-- NOTAS DE DESPACHO -->
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Notas de Despacho</label>
+                            <textarea id="dispatch-notes" rows="3" class="input-notes w-full rounded-xl p-5 text-sm shadow-inner" placeholder="Ex: Embalado com guia de garantia, enviado via SC LOG..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="px-8 py-4 bg-white border-t border-slate-100 flex flex-col items-end space-y-4">
+                        <p class="text-[9px] text-slate-400 font-bold uppercase italic text-right">
+                            * Verifique se todos os itens que o cliente enviou estão sendo devolvidos.
+                        </p>
+                        <button onclick="finalizeShipping()" class="bg-turbo-dark hover:bg-slate-900 text-white px-12 py-3.5 rounded-xl font-black uppercase tracking-widest text-xs shadow-2xl transition transform hover:-translate-y-0.5 active:translate-y-0">
+                            Finalizar e Liberar p/ SC LOG / Cliente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_QUEUE = 'https://webhook.mareflow.com.br/webhook/production/shipping-queue';
+        
+        let selectedOS = null;
+        let queueData = [];
+
+        window.onload = fetchQueue;
+
+        async function fetchQueue() {
+            try {
+                const res = await fetch(API_QUEUE);
+                const data = await res.json();
+                // Suporte Unísson (Array ou Objeto único)
+                queueData = Array.isArray(data) ? data : (data?.os_id ? [data] : []);
+                renderQueue();
+            } catch (e) { 
+                console.error("Erro fila expedição:", e);
+                document.getElementById('os-queue-container').innerHTML = '<p class="text-red-500 text-xs p-4 font-bold">Falha na conexão.</p>';
+            }
+        }
+
+        function renderQueue() {
+            const container = document.getElementById('os-queue-container');
+            container.innerHTML = '';
+            
+            queueData.forEach(os => {
+                const isSelected = selectedOS?.os_id === os.os_id ? 'os-card-selected' : '';
+                const card = document.createElement('div');
+                card.className = `p-5 cursor-pointer transition border-l-4 border-transparent bg-white rounded-xl shadow-sm hover:shadow-md mb-3 ${isSelected}`;
+                card.onclick = () => selectOS(os);
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-sm font-black text-slate-900">${os.business_id}</span>
+                        <span class="px-2 py-0.5 text-[9px] font-black uppercase rounded-md bg-orange-100 text-orange-600">${os.urgency || 'Normal'}</span>
+                    </div>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase mb-1">ID: ---</p>
+                    <p class="text-xs font-bold text-slate-700 uppercase">${os.model || 'XC90 HYBRID'}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectOS(os) {
+            selectedOS = os;
+            renderQueue();
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('workspace').classList.remove('hidden');
+            
+            // Populate Header
+            document.getElementById('display-os-id').innerText = os.business_id;
+            document.getElementById('display-os-desc').innerText = `${os.business_id} | ${os.model}`;
+            document.getElementById('display-client-tag').innerText = (os.client || 'CLIENTE').toUpperCase();
+            
+            // Populate Logistics
+            document.getElementById('info-destino').innerText = os.local_despacho || 'NÃO DEFINIDO';
+
+            // Render Anexos
+            renderAnexos(os.anexos_cliente || []);
+        }
+
+        function renderAnexos(anexos) {
+            const container = document.getElementById('anexos-list');
+            if (!anexos || anexos.length === 0) {
+                container.innerHTML = 'NENHUM ANEXO FOI REGISTRADO PARA ESTE TURBO.';
+                container.className = 'border-2 border-dashed border-slate-100 rounded-2xl p-10 text-center text-slate-400 italic text-sm';
+                return;
+            }
+
+            container.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+            container.innerHTML = anexos.map(item => `
+                <div class="flex items-center space-x-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="w-6 h-6 bg-turbo-blue rounded flex items-center justify-center text-white">
+                        <i class="fa-solid fa-check text-[10px]"></i>
+                    </div>
+                    <span class="text-xs font-black text-slate-700 uppercase">${item}</span>
+                </div>
+            `).join('');
+        }
+
+        function finalizeShipping() {
+            alert("Ação futura: Liberação para " + (selectedOS.local_despacho || "SC LOG"));
+            // Lógica de fechamento final da OS no banco de dados a ser implementada no próximo passo.
+        }
+    </script>
+</body>
+</html>
