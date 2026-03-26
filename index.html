@@ -202,7 +202,8 @@
             
             // 1. Cabeçalho (Header)
             document.getElementById('display-os-id').innerText = os.business_id;
-            document.getElementById('display-os-desc').innerText = `${os.business_id} | ${os.model}`;
+            // CORREÇÃO: Agora exibe NOME DO CLIENTE | MODELO
+            document.getElementById('display-os-desc').innerText = `${os.client} | ${os.model}`;
             document.getElementById('display-client-tag').innerText = (os.client || 'CLIENTE').toUpperCase();
             
             // 2. Dados Logísticos (Lendo do JSON do seu Banco/n8n)
